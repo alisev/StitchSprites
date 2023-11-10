@@ -1,8 +1,10 @@
 from typing import List
+import os
+import re
+
 from PIL import Image
 import numpy as np
 import matplotlib.pyplot as plt
-import os
 
 # takes a batch of sprites, crops them and stiches them into a single image
 class ImageBatch():
@@ -12,8 +14,14 @@ class ImageBatch():
 
     def __init__(self, dir: str):
         self.root = dir
-        self.paths = [f for f in os.listdir(dir) if os.path.isfile(os.path.join(dir, f))]
+        self.paths = sorted(os.listdir(dir), key = self.__natural_sort_key)
         self.bg_color = self.__get_BG_color()
+
+    def __natural_sort_key(self, s):
+        """
+        Sorts fielnames numerically.
+        """
+        return [int(text) if text.isdigit() else text.lower() for text in re.split('([0-9]+)', s)]
     
     def get_image_path(self, identifier: any) -> str:
         """
@@ -35,11 +43,11 @@ class ImageBatch():
         """
         return Image.open(image_path)
     
-    def show_image(self, image_arr):
+    def show_image(self, image: Image):
         """
         Show image on screen.
-        image_arr - Numpy array representation of image
         """
+        image_arr = np.array(image)
         plt.imshow(image_arr)
         plt.axis('off')
         plt.show()
@@ -55,7 +63,7 @@ class ImageBatch():
         image.close()
         return color
     
-    def batch_process(self, image_fn, args: tuple = (), every: int = 10) -> list:
+    def batch_process(self, image_fn, args: tuple = (), every: int = 50) -> list:
         """
         Does a batch processing on images.
         Returns a list of values from the process function.
@@ -67,7 +75,8 @@ class ImageBatch():
         for i in range(len(self.paths)):
             full_path = self.get_image_path(self.paths[i])
             image = self.load_image(full_path)
-            values.append(image_fn(image), *args)
+            value = image_fn(*(image, *args))
+            values.append(value)
             image.close()
             if i % every == 0:
                 print(f"{i}/{len(self.paths)} images processed.")
@@ -84,10 +93,23 @@ class ImageBatch():
         mask = self.__get_pixel_mask(image)
         indices = np.argwhere(mask)
         if len(indices) > 0:
-            min_x, min_y = indices.min(axis=0)
-            max_x, max_y = indices.max(axis=0)
+            min_y, min_x = indices.min(axis=0)
+            max_y, max_x = indices.max(axis=0)
             return min_x, min_y, max_x, max_y
         return None
+    
+    def minmax_borders(self, borders: list) -> tuple:
+        """
+        Takes a list of borders (tuples) and finds the largest area they cover.
+        Requirements:
+        - lowest min_x and min_y values,
+        - and highest max_x and max_y
+        borders - list of found borders.
+        """
+        borders_arr = np.array(borders)
+        mins = np.min(borders_arr, axis=0)
+        maxs = np.max(borders_arr, axis=0)
+        return mins[0], mins[1], maxs[2], maxs[3]
     
     def __get_pixel_mask(self, image: Image) -> np.ndarray:
         """
@@ -98,59 +120,109 @@ class ImageBatch():
         image_arr = np.array(rgb_image)
         return np.all(image_arr != self.bg_color, axis=-1)
 
-    def crop(self, x: int, y: int, x_len: int, y_len: int):
-        # crops all images in region
-        pass
+    def crop_image(self, image: Image, min_x: int, min_y: int, max_x: int, max_y: int) -> Image:
+        """
+        Crops image with given parameters
+        """
+        return image.crop([min_x, min_y, max_x, max_y])
 
-
-    def find_borders_todo(self, bg_color) -> tuple:
-        # goes through images
-        # finds characters location
-
-        # for each path
-        # find first pixel with non-bg color
-        # then find last pixel
-
-        # compare with last results
-        # update if x, y is closer to 0
-        # update if x + w, y + h is bigger
-        x, y, w, h = -1
-
-        # TO DO without numpy this will be slow
-        for path in self.paths:
-            image = np.array(self.load_image(path))
-            mask = np.all(image != bg_color, axis=-1)
-            #w, h = image.size
-            #for x in range(w):
-            #    for y in range(h):
-            #        color = self.get_BG_color()
-            #image.close()
-        return (1, 2, 3, 4)
+    def stitch(self, images: list, x: int, y: int) -> Image:
+        """
+        Combines images into single file.
+        images - List of images to be stitched together
+        x, y - Describes how many images there should be along x and y axis.
+        """
+        image_size = images[0].size
+        canvas = image_size[0] * x, image_size[1] * y
+        new_image = Image.new('RGB', canvas, self.bg_color)
+        for i in range(x):
+            for j in range(y):
+                p = x * j + i
+                if(p >= len(images)):
+                    break
+                images[p].convert('RGB')
+                new_x, new_y = image_size[0] * i, image_size[1] * j
+                new_image.paste(images[p], (new_x, new_y))
+        return new_image
     
-    def stitch():
+    def save_image(self, image: Image):
+        """
+        Saves image to drive.
+        """
         pass
-
-def test_img_show(images: ImageBatch):
-    img_path = images.get_image_path(0)
-    img = np.array(images.load_image(img_path))
-    images.show_image(img)
-
-def test_find_borders_in_one_image(images: ImageBatch):
-    img_path = images.get_image_path(0)
-    img =images.load_image(img_path)
-    borders = images.find_borders(img)
-    print(borders)
-
-def main(dir: str):
-    images = ImageBatch(dir)
-    borders = images.batch_process(images.find_borders)
-    print(borders)
-    #crop_region = images.find_borders(bg_color)
-    #cropped_images = images.crop(*crop_region)
 
 if __name__ == "__main__":
     # some parameters
     # TO DO add argparse, so the program can be used from CMD
     FOLDER = 'NecoStory'
     DIR = os.path.join(os.getcwd(), FOLDER)
-    main(DIR)
+    CROP_CONFIG = {
+        "idle": 9,
+        "kick": 7,
+        "getup": 4,
+        "crawl": 12,
+        "crawlidle": 18,
+        "jump": 13,
+        "dodge": 9,
+        "intimidate": 5,
+        "roar": 10,
+        "whistle": 12,
+        "whistle2": 12,
+        "rush": 11,
+        "tornado": 6,
+        "drag": 9,
+        "turn": 9,
+        "crawlturn": 4,
+        "block": 3,
+        "crawlblock": 3,
+        "jumpblock": 3,
+        "sparkle": 5,
+        "crawlsparkle": 5,
+        "jumpsparkle": 5,
+        "hit": 5,
+        "crawlhit": 5,
+        "jumphit": 5,
+        "land": 18,
+        "spooky": 2,
+        "thrown": 4,
+        "throwland": 4,
+        "getup2": 4,
+        "lay": 2,
+        "throwside": 7,
+        "throwup": 14,
+        "idk": 19,
+        "comeout": 11,
+        "dance": 10,
+        "dance2": 12,
+        "dance3": 22,
+        "idk2": 3,
+        "poseknife": 5,
+        "pose": 5,
+        "dodge": 5,
+        "posebroom": 5,
+        "phew": 6,
+        "victory": 2,
+        "flyup": 4,
+        "kicks": 2,
+        "eyesparkle": 6,
+        "jojopose": 10,
+        "scheme": 12,
+        "idlexpressions": 15,
+        "wine": 17,
+        "shrug": 7,
+        "laugh": 8
+    }
+
+    images = ImageBatch(DIR)
+    #all_borders = images.batch_process(images.find_borders)
+    #crop_borders = images.minmax_borders(all_borders)
+    crop_borders = (380, 461, 597, 695) # for time saving purposes
+    cropped_images = images.batch_process(images.crop_image, crop_borders)
+
+    key = "idle"
+    x_rows = 10
+    y_rows = 1 if CROP_CONFIG[key] < x_rows else CROP_CONFIG[key] // x_rows
+
+    stitched_img = images.stitch(cropped_images[0:CROP_CONFIG[key]-1], 10, y_rows)
+    images.show_image(stitched_img)
+
