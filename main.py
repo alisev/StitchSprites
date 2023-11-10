@@ -1,10 +1,10 @@
-from typing import List
 import os
-import re
+from re import split
 
 from PIL import Image
 import numpy as np
 import matplotlib.pyplot as plt
+from math import ceil
 
 # takes a batch of sprites, crops them and stiches them into a single image
 class ImageBatch():
@@ -21,7 +21,7 @@ class ImageBatch():
         """
         Sorts fielnames numerically.
         """
-        return [int(text) if text.isdigit() else text.lower() for text in re.split('([0-9]+)', s)]
+        return [int(text) if text.isdigit() else text.lower() for text in split('([0-9]+)', s)]
     
     def get_image_path(self, identifier: any) -> str:
         """
@@ -158,73 +158,13 @@ if __name__ == "__main__":
     # TO DO add argparse, so the program can be used from CMD
     FOLDER = 'NecoStory'
     DIR = os.path.join(os.getcwd(), FOLDER)
-    CROP_CONFIG = {
-        "idle": 9,
-        "kick": 7,
-        "getup": 4,
-        "crawl": 12,
-        "crawlidle": 18,
-        "jump": 13,
-        "dodge": 9,
-        "intimidate": 5,
-        "roar": 10,
-        "whistle": 12,
-        "whistle2": 12,
-        "rush": 11,
-        "tornado": 6,
-        "drag": 9,
-        "turn": 9,
-        "crawlturn": 4,
-        "block": 3,
-        "crawlblock": 3,
-        "jumpblock": 3,
-        "sparkle": 5,
-        "crawlsparkle": 5,
-        "jumpsparkle": 5,
-        "hit": 5,
-        "crawlhit": 5,
-        "jumphit": 5,
-        "land": 18,
-        "spooky": 2,
-        "thrown": 4,
-        "throwland": 4,
-        "getup2": 4,
-        "lay": 2,
-        "throwside": 7,
-        "throwup": 14,
-        "idk": 19,
-        "comeout": 11,
-        "dance": 10,
-        "dance2": 12,
-        "dance3": 22,
-        "idk2": 3,
-        "poseknife": 5,
-        "pose": 5,
-        "dodge": 5,
-        "posebroom": 5,
-        "phew": 6,
-        "victory": 2,
-        "flyup": 4,
-        "kicks": 2,
-        "eyesparkle": 6,
-        "jojopose": 10,
-        "scheme": 12,
-        "idlexpressions": 15,
-        "wine": 17,
-        "shrug": 7,
-        "laugh": 8
-    }
+    X_ROWS, Y_ROWS = 10, 10
 
     images = ImageBatch(DIR)
-    #all_borders = images.batch_process(images.find_borders)
-    #crop_borders = images.minmax_borders(all_borders)
-    crop_borders = (380, 461, 597, 695) # for time saving purposes
+    all_borders = images.batch_process(images.find_borders)
+    crop_borders = images.minmax_borders(all_borders)
     cropped_images = images.batch_process(images.crop_image, crop_borders)
-
-    key = "idle"
-    x_rows = 5
-    y_rows = 1 if CROP_CONFIG[key] < x_rows else CROP_CONFIG[key] // x_rows
-
-    stitched_img = images.stitch(cropped_images[0:CROP_CONFIG[key]-1], 10, y_rows)
-    images.save_image(stitched_img, f"{key}.png")
+    stitched_img = images.stitch(cropped_images, X_ROWS, Y_ROWS)
+    images.save_image(stitched_img, "sprite_sheet.png")
+        
 
