@@ -145,11 +145,13 @@ class ImageBatch():
                 new_image.paste(images[p], (new_x, new_y))
         return new_image
     
-    def save_image(self, image: Image):
+    def save_image(self, image: Image, name: str):
         """
         Saves image to drive.
         """
-        pass
+        save_dir = os.path.join(os.getcwd(), "output", name)
+        image.save(save_dir)
+        print(f"Image {name} saved!")
 
 if __name__ == "__main__":
     # some parameters
@@ -219,10 +221,12 @@ if __name__ == "__main__":
     crop_borders = (380, 461, 597, 695) # for time saving purposes
     cropped_images = images.batch_process(images.crop_image, crop_borders)
 
+    # TODO find the most optimized sprite configuration
+
     key = "idle"
     x_rows = 10
     y_rows = 1 if CROP_CONFIG[key] < x_rows else CROP_CONFIG[key] // x_rows
 
     stitched_img = images.stitch(cropped_images[0:CROP_CONFIG[key]-1], 10, y_rows)
-    images.show_image(stitched_img)
+    images.save_image(stitched_img, f"{key}.png")
 
