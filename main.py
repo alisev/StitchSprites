@@ -221,10 +221,8 @@ if __name__ == "__main__":
     crop_borders = (380, 461, 597, 695) # for time saving purposes
     cropped_images = images.batch_process(images.crop_image, crop_borders)
 
-    # TODO find the most optimized sprite configuration
-
     key = "idle"
-    x_rows = 10
+    x_rows = 5
     y_rows = 1 if CROP_CONFIG[key] < x_rows else CROP_CONFIG[key] // x_rows
 
     stitched_img = images.stitch(cropped_images[0:CROP_CONFIG[key]-1], 10, y_rows)
