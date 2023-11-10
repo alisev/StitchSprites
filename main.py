@@ -8,10 +8,12 @@ import os
 class ImageBatch():
     root = ""
     paths = []
+    bg_color = ()
 
     def __init__(self, dir: str):
         self.root = dir
         self.paths = [f for f in os.listdir(dir) if os.path.isfile(os.path.join(dir, f))]
+        self.bg_color = self.__get_BG_color()
     
     def get_image_path(self, identifier: any) -> str:
         """
@@ -42,23 +44,18 @@ class ImageBatch():
         plt.axis('off')
         plt.show()
 
-    def get_BG_color(self, image: Image = None):
+    def __get_BG_color(self) -> tuple:
         """
         Returns the (probable) background color of image
         TODO: This is a trivial. It just works.
         """
-        keepImageOpen = True
-        if image == None:
-            image_path = self.get_image_path(0)
-            image = self.load_image(image_path)
-            keepImageOpen = False
+        image_path = self.get_image_path(0)
+        image = self.load_image(image_path).convert('RGB')
         color = image.getpixel((0, 0))
-
-        if keepImageOpen == False:
-            image.close()
+        image.close()
         return color
     
-    def batch_process(self, image_fn: function, args: tuple = ()) -> list:
+    def batch_process(self, image_fn, args: tuple = (), every: int = 10) -> list:
         """
         Does a batch processing on images.
         Returns a list of values from the process function.
@@ -66,38 +63,40 @@ class ImageBatch():
         args - Other arguments for the function.
         """
         values = []
-        for path in self.paths:
-            full_path = self.get_image_path(path)
+        print("Processing images...")
+        for i in range(len(self.paths)):
+            full_path = self.get_image_path(self.paths[i])
             image = self.load_image(full_path)
-            values.append(image_fn(image), *args) # TODO run tests
+            values.append(image_fn(image), *args)
             image.close()
+            if i % every == 0:
+                print(f"{i}/{len(self.paths)} images processed.")
         return values
     
     def find_borders(self, image: Image) -> tuple:
         """"
         Takes a single image and returns borders of the figure.
+        Returns a tuple of bounding box or None if figure is not found.
         image - PIL image to find borders for.
         """
+        # TODO needs some way to see previous values and compare
         # doesn't work correctly in Palette mode, so its changed to RGB
-        rgb_image = image.convert('RGB')
-        bg_color = self.get_BG_color(rgb_image)
-        image_arr = np.array(rgb_image)
-        print(type(image_arr))
-        mask = np.all(image_arr != bg_color, axis=-1)
-
+        mask = self.__get_pixel_mask(image)
         indices = np.argwhere(mask)
-        print(indices)
         if len(indices) > 0:
-            # Get the bounding box of the region
-            min_x, min_y = indices.min(axis=0) # TODO not enough to unpack: expected 2, got 1
+            min_x, min_y = indices.min(axis=0)
             max_x, max_y = indices.max(axis=0)
-            # Return the coordinates of the rectangular region
             return min_x, min_y, max_x, max_y
-        # Return None if no matching region is found
         return None
     
-    def mask_pixels(self, image: Image, bg_color = tuple):
-        pass
+    def __get_pixel_mask(self, image: Image) -> np.ndarray:
+        """
+        For each pixel returns True if it belongs to the figure and False for background.
+        image - PIL Image
+        """
+        rgb_image = image.convert('RGB')
+        image_arr = np.array(rgb_image)
+        return np.all(image_arr != self.bg_color, axis=-1)
 
     def crop(self, x: int, y: int, x_len: int, y_len: int):
         # crops all images in region
@@ -144,8 +143,8 @@ def test_find_borders_in_one_image(images: ImageBatch):
 
 def main(dir: str):
     images = ImageBatch(dir)
-    test_find_borders_in_one_image(images)
-    #borders = images.batch_process(images.find_borders)
+    borders = images.batch_process(images.find_borders)
+    print(borders)
     #crop_region = images.find_borders(bg_color)
     #cropped_images = images.crop(*crop_region)
 
