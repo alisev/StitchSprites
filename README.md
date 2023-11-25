@@ -12,4 +12,4 @@ In the given example.py this program completes the following process:
 4) To crop images ImageBatch.crop_image along with the result from 3rd step is passed to ImageBatch.batch_process().
 
 5) Finally, the cropped sprites are put together in a single file with ImageBatch.stitch(). The created image can be saved with ImageBatch.save().
-![Resulting image]()
+![Resulting image](https://github.com/alisev/StitchSprites/blob/master/output/sprite_sheet.png?raw=true)
