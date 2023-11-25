@@ -82,14 +82,6 @@ class ImageBatch():
             self.__progress_message(i, every) # TODO replace with a progressbar
         return values
     
-    def __progress_message (self, i, every = 50):
-        """
-        Shows batch procession's progress.
-        """
-        if i % every == 0:
-            print(f"{i}/{len(self.paths)} images processed.")
-
-    
     def find_borders(self, image: Image) -> tuple:
         """"
         Takes a single image and returns borders of the sprite.
@@ -118,6 +110,13 @@ class ImageBatch():
         mins = np.min(borders_arr, axis=0)
         maxs = np.max(borders_arr, axis=0)
         return mins[0], mins[1], maxs[2], maxs[3]
+    
+    def __progress_message (self, i, every = 50):
+        """
+        Shows batch procession's progress.
+        """
+        if i % every == 0:
+            print(f"{i}/{len(self.paths)} images processed.")
     
     def __get_pixel_mask(self, image: Image) -> np.ndarray:
         """
