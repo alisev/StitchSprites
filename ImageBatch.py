@@ -1,10 +1,8 @@
 import os
 from re import split
-
 from PIL import Image
 import numpy as np
 import matplotlib.pyplot as plt
-from math import ceil
 
 # takes a batch of sprites, crops them and stiches them into a single image
 class ImageBatch():
@@ -12,17 +10,37 @@ class ImageBatch():
     paths = []
     bg_color = ()
 
-    def __init__(self, dir: str):
+    def __init__(self, dir: str, bg_color: tuple = None, sort_natural: bool = True):
         self.root = dir
-        self.paths = sorted(os.listdir(dir), key = self.__natural_sort_key)
-        self.bg_color = self.__get_BG_color()
+        self.paths = self.__load_filenames(dir, sort_natural)
+        self.bg_color = self.__set_BG_color(bg_color)
 
-    def __natural_sort_key(self, s):
+    def __load_filenames(self, dir: str, sort_natural: bool) -> list:
         """
-        Sorts fielnames numerically.
+        Loads all filenames found in directory dir.
+        Natural sorting takes number order into account, e.g. 1_000.bmp, 2_000.bmp, 10_000.bmp instead of 1_000.bmp, 10_000.bmp, 2_000.bmp.
         """
-        return [int(text) if text.isdigit() else text.lower() for text in split('([0-9]+)', s)]
+        paths = os.listdir(dir)
+        if sort_natural:
+            natural_sort_key = lambda s: [int(text) if text.isdigit() else text.lower() for text in split('([0-9]+)', s)]
+            return sorted(paths, key = natural_sort_key)
+        return paths
     
+    def __set_BG_color(self, bg_color) -> tuple:
+        """
+        Checks value of bg_color and sets self.bg_color accordingly.
+        """
+        if bg_color == None: # TODO find a robust solution. For now this simply works.
+            image_path = self.get_image_path(0)
+            image = Image.open(image_path).convert('RGB')
+            color = image.getpixel((0, 0))
+            image.close()
+            return color
+        elif type(bg_color) == tuple:
+            return bg_color
+        else:
+            raise TypeError(f"Wrong value type for bg_color! Expected None or tuple, got {type(bg_color)}")
+
     def get_image_path(self, identifier: any) -> str:
         """
         Returns full image path from given identifier.
@@ -36,13 +54,6 @@ class ImageBatch():
             image_path = identifier
         return os.path.join(self.root, image_path)
     
-    def load_image(self, image_path: str) -> Image:
-        """
-        Loads image as a PIL Image object.
-        image_path - full path to image
-        """
-        return Image.open(image_path)
-    
     def show_image(self, image: Image):
         """
         Show image on screen.
@@ -51,17 +62,6 @@ class ImageBatch():
         plt.imshow(image_arr)
         plt.axis('off')
         plt.show()
-
-    def __get_BG_color(self) -> tuple:
-        """
-        Returns the (probable) background color of image
-        TODO: This is a trivial. It just works.
-        """
-        image_path = self.get_image_path(0)
-        image = self.load_image(image_path).convert('RGB')
-        color = image.getpixel((0, 0))
-        image.close()
-        return color
     
     def batch_process(self, image_fn, args: tuple = (), every: int = 50) -> list:
         """
@@ -69,26 +69,34 @@ class ImageBatch():
         Returns a list of values from the process function.
         image_fn - Function that accepts Image object as an argument.
         args - Other arguments for the function.
+        every - Used to show user how many images have been processed.
         """
         values = []
-        print("Processing images...")
+        print(f"{image_fn.__name__}: Processing images...")
         for i in range(len(self.paths)):
             full_path = self.get_image_path(self.paths[i])
-            image = self.load_image(full_path)
+            image = Image.open(full_path)
             value = image_fn(*(image, *args))
             values.append(value)
             image.close()
-            if i % every == 0:
-                print(f"{i}/{len(self.paths)} images processed.")
+            self.__progress_message(i, every) # TODO replace with a progressbar
         return values
+    
+    def __progress_message (self, i, every = 50):
+        """
+        Shows batch procession's progress.
+        """
+        if i % every == 0:
+            print(f"{i}/{len(self.paths)} images processed.")
+
     
     def find_borders(self, image: Image) -> tuple:
         """"
-        Takes a single image and returns borders of the figure.
-        Returns a tuple of bounding box or None if figure is not found.
+        Takes a single image and returns borders of the sprite.
+        Returns a tuple of bounding box or None if sprite is not found.
         image - PIL image to find borders for.
         """
-        # TODO needs some way to see previous values and compare
+        # TODO needs some way to see previously saved min and max values and compare them
         # doesn't work correctly in Palette mode, so its changed to RGB
         mask = self.__get_pixel_mask(image)
         indices = np.argwhere(mask)
@@ -152,19 +160,5 @@ class ImageBatch():
         save_dir = os.path.join(os.getcwd(), "output", name)
         image.save(save_dir)
         print(f"Image {name} saved!")
-
-if __name__ == "__main__":
-    # some parameters
-    # TO DO add argparse, so the program can be used from CMD
-    FOLDER = 'NecoStory'
-    DIR = os.path.join(os.getcwd(), FOLDER)
-    X_ROWS, Y_ROWS = 10, 10
-
-    images = ImageBatch(DIR)
-    all_borders = images.batch_process(images.find_borders)
-    crop_borders = images.minmax_borders(all_borders)
-    cropped_images = images.batch_process(images.crop_image, crop_borders)
-    stitched_img = images.stitch(cropped_images, X_ROWS, Y_ROWS)
-    images.save_image(stitched_img, "sprite_sheet.png")
         
 

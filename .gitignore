@@ -2,5 +2,5 @@
 /NecoStory
 Credits and Notes.txt
 
-# sprite output
-/output/*
+/__pycache__
+
