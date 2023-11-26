@@ -13,6 +13,7 @@ In the given example.py this program completes the following process:
 3) ImageBatch.minmax_borders() is then used to find the most optimal borders, that will not cut off a part of a sprite.
 
 ![Resulting image](https://github.com/alisev/StitchSprites/blob/master/example%20images/optimal_border.png)
+
 ![Resulting image](https://github.com/alisev/StitchSprites/blob/master/example%20images/optimal_border_2.png)
 
 4) To crop images ImageBatch.crop_image along with the result from 3rd step is passed to ImageBatch.batch_process().
