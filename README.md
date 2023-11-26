@@ -27,6 +27,11 @@ In the given example.py this program completes the following process:
 ## __init__
 Initializes the object by assigning values to ImageBatch.root, ImageBatch.paths and ImageBatch.bg_color.
 
+Parameters:
+* dir (string) - Path to folder of sprites.
+* bg_color (tuple or None) - Background color used in sprites. If it is set as None, then program will find it on its own.
+* sort_natural (bool) - Specifies if folder's contents need to be sorted.
+
 ## __load_filenames
 Used during object initiation. 
 Loads all filenames from given directory dir into a list. Will sort them, if argument natural_sort is set to True.
