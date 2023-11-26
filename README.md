@@ -1,9 +1,9 @@
 # StitchSprites
 Python program that takes a folder of separate sprites and packs them into a sprite sheet.
 
-1. [Example process](#section-1)
-2. [ImageBatch methods](#section-2)
-3. [Arguments](#section-3)
+1. [Example process](#example-process)
+2. [ImageBatch methods](#imagebatch-methods)
+3. [Arguments](#arguments)
 
 # Example process
 In the given example.py this program completes the following process:
@@ -32,13 +32,18 @@ In the given example.py this program completes the following process:
 Initializes the object by assigning values to ImageBatch.root, ImageBatch.paths and ImageBatch.bg_color.
 
 Parameters:
-* dir (string) - Path to folder of sprites.
-* bg_color (tuple or None) - Background color used in sprites. If it is set as None, then program will find it on its own.
-* sort_natural (bool) - Specifies if folder's contents need to be sorted.
+* dir: string
+    - Path to folder of sprites.
+* bg_color: {tuple, None}, optional
+    - Background color used in sprites. If it is set as None, then program will find it on its own.
+* sort_natural: bool, optional
+    - Specifies if folder's contents need to be sorted.
 
 ## __load_filenames
-Used during object initiation. 
-Loads all filenames from given directory dir into a list. Will sort them, if argument natural_sort is set to True.
+Used during object initiation. Loads all filenames from given directory dir into a list. Will sort them, if argument natural_sort is set to True.
+
+Parameters:
+* 
 
 ## __set_bg_color
 Used during object initiation. 
