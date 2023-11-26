@@ -1,6 +1,10 @@
 # StitchSprites
 Python program that takes a folder of separate sprites and packs them into a sprite sheet.
 
+1. [Example process](#section-1)
+2. [ImageBatch methods](#section-2)
+3. [Arguments](#section-3)
+
 # Example process
 In the given example.py this program completes the following process:
 
@@ -23,7 +27,7 @@ In the given example.py this program completes the following process:
 ![Resulting image](https://github.com/alisev/StitchSprites/blob/master/output/sprite_sheet.png)
 
 
-# ImageBatch methods:
+# ImageBatch methods
 ## __init__
 Initializes the object by assigning values to ImageBatch.root, ImageBatch.paths and ImageBatch.bg_color.
 
