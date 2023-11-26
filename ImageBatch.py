@@ -39,7 +39,7 @@ class ImageBatch():
         elif type(bg_color) == tuple:
             return bg_color
         else:
-            raise TypeError(f"Wrong value type for bg_color! Expected None or tuple, got {type(bg_color)}")
+            raise TypeError(self.__err_TypeError_message(bg_color, self.__set_BG_color, [tuple, None]))
 
     def get_image_path(self, identifier: any) -> str:
         """
@@ -52,6 +52,8 @@ class ImageBatch():
             image_path = self.paths[identifier]
         elif type(identifier) == str:
             image_path = identifier
+        else:
+            raise TypeError(self.__err_TypeError_message(identifier, self.__set_BG_color, [int, str]))
         return os.path.join(self.root, image_path)
     
     def show_image(self, image: Image):
@@ -159,5 +161,10 @@ class ImageBatch():
         save_dir = os.path.join(os.getcwd(), "output", name)
         image.save(save_dir)
         print(f"Image {name} saved!")
-        
+
+    def __err_TypeError_message(self, var: any, fn: function, expected_types: list) -> str:
+        """
+        Returns text for TypeError message.
+        """
+        return f"Wrong value type for variable in {fn.__name__}! Expected {expected_types}, got {type(var)}."
 

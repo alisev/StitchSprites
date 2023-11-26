@@ -43,17 +43,40 @@ Parameters:
 Used during object initiation. Loads all filenames from given directory dir into a list. Will sort them, if argument natural_sort is set to True.
 
 Parameters:
-* 
+* dir: string
+    - Path to folder of sprites.
+* sort_natural: bool
+    - Specifies if folder's contents need to be sorted.
+
+Returns: list
+*   - List of filenames.
 
 ## __set_bg_color
-Used during object initiation. 
-Picks background color from an image or uses the one passed by user.
+Used during object initiation. Picks background color from an image or uses the one passed by user.
+
+Parameters:
+* bg_color: {tuple, None}
+    - Background color used in sprites. If it is set as None, then program will find it on its own.
+
+Returns: tuple
+*   - Background color value.
 
 ## get_image_path
 Combines ImageBatch.root with given identifier to image path into a single filepath.
 
+Parameters:
+* identifier: {int, str}
+    - Some value representing a path from ImageBatch.paths. Can be either an index number or filename itself.
+
+Returns: str
+*   - Full path to file.
+
 ## show_image
 Shows image.
+
+Parameters:
+* image: Image
+    - A PIL image object.
 
 ## batch_process
 A function that accepts any other ImageBatch method as an argument and processes all images with it.
@@ -78,6 +101,19 @@ Shows how many images have been processed. Used by batch_process.
 
 ## __get_pixel_mask
 Overlays ImageBtach.bg_color over image's pixels and creates a mask. Used by find_borders.
+
+## __err_TypeError_message
+Returns text used in TypeError message.
+
+Parameters:
+* var: any
+    - Erroneous variable.
+* fn: function
+    - The function where error happened.
+* expected_types: list
+    - List of types that were expected.
+
+Returns: str
 
 # Arguments
 ## to be added....
