@@ -171,6 +171,3 @@ Parameters:
     - List of types that were expected.
 
 Returns: str
-
-# Arguments
-## to be added....
