@@ -14,7 +14,7 @@ In the given example.py this program completes the following process:
 
 ![Resulting image](https://github.com/alisev/StitchSprites/blob/master/example%20images/optimal_border.png)
 
-![Resulting image](https://github.com/alisev/StitchSprites/blob/master/example%20images/optimal_border_2.png)
+![Resulting image](https://github.com/alisev/StitchSprites/blob/master/example%20images/optimal_borders_2.png)
 
 4) To crop images ImageBatch.crop_image along with the result from 3rd step is passed to ImageBatch.batch_process().
 
@@ -65,3 +65,5 @@ Shows how many images have been processed. Used by batch_process.
 ## __get_pixel_mask
 Overlays ImageBtach.bg_color over image's pixels and creates a mask. Used by find_borders.
 
+# Arguments
+## to be added....
