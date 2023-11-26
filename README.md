@@ -49,7 +49,7 @@ Parameters:
     - Specifies if folder's contents need to be sorted.
 
 Returns: list
-*   - List of filenames.
+    - List of filenames.
 
 ## __set_bg_color
 Used during object initiation. Picks background color from an image or uses the one passed by user.
@@ -59,7 +59,7 @@ Parameters:
     - Background color used in sprites. If it is set as None, then program will find it on its own.
 
 Returns: tuple
-*   - Background color value.
+    - Background color value.
 
 ## get_image_path
 Combines ImageBatch.root with given identifier to image path into a single filepath.
@@ -69,7 +69,7 @@ Parameters:
     - Some value representing a path from ImageBatch.paths. Can be either an index number or filename itself.
 
 Returns: str
-*   - Full path to file.
+    - Full path to file.
 
 ## show_image
 Shows image.
