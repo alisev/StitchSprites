@@ -7,9 +7,11 @@ In the given example.py this program completes the following process:
 1) Loads images from user's specified folder into ImageBatch object. 
 
 2) ImageBatch.batch_process(ImageBatch.find_borders) is used to find borders in each image.
+
 ![Resulting image](https://github.com/alisev/StitchSprites/blob/master/example%20images/borders.png)
 
 3) ImageBatch.minmax_borders() is then used to find the most optimal borders, that will not cut off a part of a sprite.
+
 ![Resulting image](https://github.com/alisev/StitchSprites/blob/master/example%20images/optimal_border.png)
 ![Resulting image](https://github.com/alisev/StitchSprites/blob/master/example%20images/optimal_border_2.png)
 
