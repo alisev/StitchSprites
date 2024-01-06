@@ -18,6 +18,11 @@ class ImageBatch():
         self.paths = self.__load_filenames(dir, sort_natural)
 
     def __is_png(self, file : str) -> bool:
+        """
+        Checks if a file is a png. This allows non-png
+        files in the given directory without causing
+        the program to crash.
+        """
         return file.endswith(".png")
     
     def __load_filenames(self, dir: str, sort_natural: bool = True) -> list:
@@ -136,13 +141,6 @@ class ImageBatch():
         maxy = miny + niceHeight
             
         return minx, miny, maxx, maxy
-    
-    def __progress_message (self, i, every = 50):
-        """
-        Shows batch procession's progress.
-        """
-        if i % every == 0:
-            print(f"{i}/{len(self.paths)} images processed.")
     
     def crop_image(self, image: Image, min_x: int, min_y: int, max_x: int, max_y: int) -> Image:
         """
