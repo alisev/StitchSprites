@@ -62,13 +62,12 @@ class ImageBatch():
         plt.axis('off')
         plt.show()
     
-    def batch_process(self, image_fn, args: tuple = (), every: int = 5) -> list:
+    def batch_process(self, image_fn, args: tuple = ()) -> list:
         """
         Does a batch processing on images.
         Returns a list of values from the process function.
         image_fn - Function that accepts Image object as an argument.
         args - Other arguments for the function.
-        every - Used to show user how many images have been processed.
         """
         values = []
         bar = Bar(f"{image_fn.__name__}", max = len(self.paths))
