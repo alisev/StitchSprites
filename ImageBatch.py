@@ -1,4 +1,3 @@
-import args
 import sys
 
 import os
@@ -8,6 +7,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from progress.bar import Bar
 
+# Adapted from https://github.com/alisev/StitchSprites by alisev
 
 class ImageBatch():
     root = ""
@@ -113,7 +113,7 @@ class ImageBatch():
         miny, maxy = self.__scoot(proj[1]), self.__scoot(proj[1], rev = True)
         return (minx, miny, maxx, maxy)
     
-    def minmax_borders(self, borders: list) -> tuple:
+    def minmax_borders(self, borders: list, ideal: bool=False) -> tuple:
         """
         Takes a list of borders (tuples) and finds the largest area they cover.
         Requirements:
@@ -125,17 +125,20 @@ class ImageBatch():
         mins = np.min(borders_arr, axis=0)
         maxs = np.max(borders_arr, axis=0)
 
+        if not ideal:
+            return mins[0], mins[1], maxs[2], maxs[3]
+
         # Ideally, width and height will be powers of two
-        width = maxs[0] - mins[0]
-        height = maxs[1] - mins[1]
+        width = maxs[2] - mins[0]
+        height = maxs[3] - mins[1]
         niceWidth = 1
         niceHeight = 1
         while niceWidth < width:
             niceWidth *= 2
         while niceHeight < height:
             niceHeight *= 2
-        minx = mins[0] - (niceWidth - width)/2
-        miny = mins[1] - (niceHeight - height)/2
+        minx = mins[0] - (niceWidth - width)//2
+        miny = mins[1] - (niceHeight - height)//2
         maxx = minx + niceWidth
         maxy = miny + niceHeight
             
@@ -171,7 +174,7 @@ class ImageBatch():
         """
         Saves image to drive.
         """
-        save_dir = os.path.join(os.getcwd(), "output", name)
+        save_dir = os.path.join(os.getcwd(), name)
         image.save(save_dir)
         print(f"Image {name} saved!")
 
